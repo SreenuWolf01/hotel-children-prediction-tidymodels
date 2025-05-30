@@ -1,0 +1,202 @@
+---
+title: "652 Project: Penalized Logistic Regression"
+author: "Sreenivas Annagiri"
+date: "2024-03-21"
+output:
+  html_document: default
+  pdf_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# 652 Project: Penalized Logistic Regression Model for Hotel Data
+
+## 1. Build the PENALIZED LOGISTIC REGRESSION model for the hotel data. Explain how the recipe and workflow functions are used to prepare the data for the model. Also, explain how the tune_grid is used.
+
+### Answer:
+
+In this hotel data analysis scenario, we're using a special type of
+model called penalized logistic regression. Our goal? To figure out
+which hotel bookings included kids or babies.
+
+We're building this model using a few key steps and some handy functions
+from the `tidymodels` framework. These include the 'recipe', 'workflow',
+and 'tune_grid' functions. Each of these plays a crucial role in shaping
+our model and helping us make those predictions.
+
+### Recipe
+
+These are the preprocessing steps before data modeling. Explanation of
+steps in recipe:
+
+1.  `step_date()`: This function is used to pull out specific parts from
+    a date variable. For the variable `arrival_date`, this function
+    could help you get the details like the year, month, or day.
+2.  `step_holiday()`: This process creates a binary (yes/no) output for
+    certain holidays based on the `arrival_date` variable.
+3.  `step_dummy()`: This converts all the categorical variables into
+    dummy variables.
+4.  `step_zv()`: This step eliminates predictors that have no variation,
+    as these don't contribute to any predictions.
+5.  `step_normalize()`: This step involves adjusting predictors by
+    scaling and centering them. This is crucial for penalized models, as
+    they operate under the assumption that all predictors are on a
+    uniform scale.
+
+### Workflow
+
+The `workflow()` function is like a bridge that connects the
+pre-processing steps (defined in the recipe) and the model we're using
+(in this case, `logistic_reg()`). It's like a package deal; it ensures
+that the pre-processing and model fitting happen together smoothly. This
+is super important for making sure our work is reproducible and
+consistent.
+
+### Tune Grid
+
+The `tune_grid()` function is like a treasure hunter for our model. It's
+on a mission to find the best hyperparameters. How does it do this? It
+takes a few things into consideration: the workflow object, the
+validation dataset (`val_set`), a grid of potential hyperparameter
+values (`lr_reg_grid`), and some control options.
+
+The grid lays out a range of penalty values to test with the logistic
+regression model. For each point in this hyperparameter space,
+`tune_grid()` trains the model.
+
+So, in a nutshell, `tune_grid()` is like our model's personal trainer.
+It tests out different setups to find the one that gives our model the
+best performance on the validation data. It's all about finding the
+sweet spot!
+
+## 2. The model creation can be found after 3rd question.
+
+## 3. Data Introduction
+
+### THE HOTEL BOOKINGS DATA
+
+The dataset mentioned is related to hotel bookings from Antonio,
+Almeida, and Nunes (2019) to predict which hotel stays included children
+and/or babies, based on the other characteristics of the stays such as
+which hotel the guests stay at, how much they pay, etc.
+
+This is already existed at a #TidyTuesday dataset with a data dictionary
+you may want to look over to learn more about the variables. We'll use a
+slightly edited version of the dataset for this case study.
+
+### THE HOTEL BOOKINGS DATA Intro
+
+This article provides an overview of two datasets that capture demand
+data for two distinct types of hotels: a resort hotel (H1) and city
+hotel (H2). Each dataset comprises 31 variables that capture the details
+from 40,060 bookings for the resort hotel and 79,330 bookings for the
+city hotel. The datasets span from July 1, 2015, to August 31, 2017,
+including both actual and canceled bookings. Identifiable information
+regarding the hotels or customers has been removed to maintain privacy.
+Given the lack of readily available business data for academic and
+practical learning, these datasets offer valuable insights for research
+and educational pursuits in areas like revenue management, machine
+learning, and data mining, among others.
+
+## Load required packages and Data
+
+```{r load_packages_and_data}
+library(tidymodels)
+library(readr)
+library(vip)
+
+# Load the hotel data
+hotels <- read_csv("[https://tidymodels.org/start/case-study/hotels.csv](https://tidymodels.org/start/case-study/hotels.csv)") %>%
+  mutate(across(where(is.character), as.factor))
+
+# Display a summary or head of the data if needed for context
+# glimpse(hotels)
+# head(hotels)
+```
+
+## Model Creation (Following Question 3)
+
+(This section would typically contain the R code for defining the model
+specification, creating the recipe, defining the workflow, setting up
+the tune grid, executing the tuning, and selecting the best model. Since
+the full R code for model creation was not in the PDF snippet, this is a
+placeholder for where that code would go.)
+
+(For example, you might have code here for:) \* `set.seed()` \*
+`initial_split()` and `training()`, `testing()` \* `vfold_cv()` for
+cross-validation \* `logistic_reg()` model specification \* `recipe()`
+definition \* `workflow()` creation \* `tune_grid()` execution \*
+`show_best()`, `select_best()` \* `finalize_workflow()` \* `last_fit()`
+\* `collect_metrics()`, `collect_predictions()` \* ROC curve plotting
+using `ggplot2`
+
+(Add your specific R code for the model creation here, similar to how it
+would appear in a complete R Markdown file.)
+
+``` r
+# Example placeholder for model creation code:
+# # Define the model
+# lr_mod <- logistic_reg(penalty = tune(), mixture = 1) %>%
+#   set_engine("glmnet")
+#
+# # Define the recipe
+# hotel_rec <- recipe(children ~ ., data = hotels) %>%
+#   step_date(arrival_date, features = c("year", "month", "dow", "doy")) %>%
+#   step_holiday(arrival_date) %>%
+#   step_dummy(all_nominal_predictors()) %>%
+#   step_zv(all_predictors()) %>%
+#   step_normalize(all_numeric_predictors())
+#
+# # Create a workflow
+# lr_workflow <- workflow() %>%
+#   add_model(lr_mod) %>%
+#   add_recipe(hotel_rec)
+#
+# # Create a validation set for tuning
+# set.seed(123)
+# hotel_split <- initial_split(hotels, prop = 0.8, strata = children)
+# hotel_train <- training(hotel_split)
+# hotel_test <- testing(hotel_split)
+#
+# # Create folds for cross-validation
+# set.seed(234)
+# hotel_folds <- vfold_cv(hotel_train, v = 5, strata = children)
+#
+# # Define the tuning grid for penalty
+# lr_reg_grid <- dials::grid_regular(penalty(), levels = 20)
+#
+# # Tune the model
+# set.seed(345)
+# lr_res <- tune_grid(
+#   lr_workflow,
+#   resamples = hotel_folds,
+#   grid = lr_reg_grid,
+#   metrics = metric_set(roc_auc, accuracy)
+# )
+#
+# # Show best results
+# show_best(lr_res, "roc_auc")
+#
+# # Select the best penalty
+# best_auc <- select_best(lr_res, "roc_auc")
+#
+# # Finalize the workflow with the best penalty
+# final_lr_workflow <- lr_workflow %>%
+#   finalize_workflow(best_auc)
+#
+# # Fit the final model to the training data and evaluate on test data
+# final_lr_fit <- last_fit(final_lr_workflow, hotel_split)
+#
+# # Collect metrics and predictions
+# collect_metrics(final_lr_fit)
+# collect_predictions(final_lr_fit) %>%
+#   roc_curve(children, .pred_children) %>%
+#   autoplot()
+```
+
+------------------------------------------------------------------------
